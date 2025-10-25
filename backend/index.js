@@ -10,14 +10,15 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://vovinamspkt.vercel.app"],
     credentials: true
 }))
+
 
 //routes
 const fighterRoute = require("./src/routes/fighter.route")
 
-app.use("/api", fighterRoute)
+app.use("/api/fighter", fighterRoute)
 
 
 const port = process.env.PORT || 3000
