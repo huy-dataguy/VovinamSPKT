@@ -1,5 +1,4 @@
 const getBaseUrl = () => {
-    // return 'http://localhost:3000';
-    return 'https://vovinamspkt-be.vercel.app';
+    return 'http://localhost:3000';
 }
 export default getBaseUrl;

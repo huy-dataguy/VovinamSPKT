@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+utils/getBaseUrl.js
+src/utils/getBaseUrl.js
+.env
