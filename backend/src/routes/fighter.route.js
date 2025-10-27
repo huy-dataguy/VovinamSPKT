@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { createFighter, getFighters } = require("../controllers/fighter.controller");
+const { addFighter, getAllFighters } = require("../controllers/fighter.controller");
 
-// Đăng ký võ sinh
-router.post("/register", createFighter);
+router.post("/register", addFighter);
 
-// Lấy danh sách võ sinh
-router.get("/fighters", getFighters);
+router.get("/fighters", getAllFighters);
 
 module.exports = router;

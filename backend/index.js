@@ -16,9 +16,11 @@ app.use(cors({
 
 
 //routes
-const fighterRoute = require("./src/routes/fighter.route")
 
-app.use("/api/fighter", fighterRoute)
+app.use("/api/fighters", require("./src/routes/fighter.route"));
+app.use('/api/tournaments', require("./src/routes/tournament.route"));
+app.use('/api/matches', require("./src/routes/match.route"));
+
 
 
 const port = process.env.PORT || 3000
