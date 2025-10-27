@@ -10,6 +10,7 @@ const Home = () => {
 
   const [formData, setFormData] = useState({
     name: '',
+    gender: '', // ✅ thêm trường giới tính
     weight: '',
     belt: '',
   });
@@ -25,7 +26,7 @@ const Home = () => {
 
     try {
       await addFighter(newFighter).unwrap();
-      setFormData({ name: '', weight: '', belt: '' });
+      setFormData({ name: '', gender: '', weight: '', belt: ''});
     } catch (err) {
       console.error('Error adding fighter:', err);
     }
@@ -51,6 +52,19 @@ const Home = () => {
           className="border p-2 rounded-md w-full"
           required
         />
+
+
+        <select 
+          value={formData.gender}
+          onChange={(e) => setFormData({...formData, gender: e.target.value})}
+          className="border p-2 rounded-md w-full"
+          required
+        >
+          <option value="">Giới tính</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+        </select>
+
         <input 
           type="number" 
           placeholder="Cân nặng (kg)" 
@@ -59,6 +73,7 @@ const Home = () => {
           className="border p-2 rounded-md w-full"
           required
         />
+
         <select 
           value={formData.belt}
           onChange={(e) => setFormData({...formData, belt: e.target.value})}
@@ -93,6 +108,7 @@ const Home = () => {
             <tr>
               <th className="border p-2">#</th>
               <th className="border p-2">Tên</th>
+              <th className="border p-2">Giới tính</th> {/* ✅ thêm cột giới tính */}
               <th className="border p-2">Cân nặng</th>
               <th className="border p-2">Cấp đai</th>
             </tr>
@@ -102,6 +118,7 @@ const Home = () => {
               <tr key={f._id || index}>
                 <td className="border p-2">{index + 1}</td>
                 <td className="border p-2">{f.name}</td>
+                <td className="border p-2">{f.gender}</td>
                 <td className="border p-2">{f.weight}</td>
                 <td className="border p-2">{f.belt}</td>
               </tr>
