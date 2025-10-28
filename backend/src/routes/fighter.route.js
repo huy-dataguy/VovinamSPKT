@@ -4,6 +4,6 @@ const { addFighter, getAllFighters } = require("../controllers/fighter.controlle
 
 router.post("/register", addFighter);
 
-router.get("/fighters", getAllFighters);
+router.get("/", getAllFighters);
 
 module.exports = router;
