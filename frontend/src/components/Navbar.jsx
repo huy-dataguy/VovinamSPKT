@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import avatarImage from "../assets/avatar.png";
 import fightday from "../assets/vvnspkt.png";
+import { HiUserCircle } from "react-icons/hi2";
 
 const Navbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-  const currentUser = true;
+  const navigate = useNavigate();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -14,13 +13,32 @@ const Navbar = () => {
     { name: 'Matches', href: '/matches' },
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'VoviChat', href: '/vovichat' },
-
   ];
 
   const profile = [
     { name: "Profile", href: "/profile" },
-    { name: "Log out", href: "/logout" }
   ];
+
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+
+  // Logout function
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setIsDropDownOpen(false);
+    navigate('/fighters');
+  };
+
+  // Listen for storage changes (login from other tab)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(!!localStorage.getItem('token'));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleLinkClick = () => {
     setIsDropDownOpen(false);
@@ -32,18 +50,11 @@ const Navbar = () => {
       <div className="max-w-screen-xl mx-auto flex items-center justify-between p-4">
         {/* Left side: Logo + Mobile menu button */}
         <div className="flex items-center space-x-2">
-          {/* Mobile toggle (hamburger) - now on the LEFT */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
           >
-            <svg
-              className="w-6 h-6"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -61,31 +72,23 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Center: Navigation (desktop only) */}
+        {/* Center navigation (desktop only) */}
         <ul className="hidden md:flex md:space-x-8 text-gray-900 dark:text-white">
           {navigation.map((item) => (
             <li key={item.name}>
-              <Link
-                to={item.href}
-                onClick={handleLinkClick}
-                className="py-2 px-3 hover:text-blue-600 dark:hover:text-blue-400"
-              >
+              <Link to={item.href} onClick={handleLinkClick} className="py-2 px-3 hover:text-blue-600 dark:hover:text-blue-400">
                 {item.name}
               </Link>
             </li>
           ))}
         </ul>
 
-        {/* Right side: Avatar */}
+        {/* Right side: Avatar / login icon */}
         <div className="flex items-center">
-          {currentUser && (
+          {isLoggedIn ? (
             <div className="relative">
               <button onClick={() => setIsDropDownOpen(!isDropDownOpen)}>
-                <img
-                  src={avatarImage}
-                  alt="Avatar"
-                  className="w-10 h-10 rounded-full border border-gray-300"
-                />
+                <img src={avatarImage} alt="Avatar" className="w-10 h-10 rounded-full border border-gray-300" />
               </button>
 
               {isDropDownOpen && (
@@ -93,18 +96,27 @@ const Navbar = () => {
                   <ul>
                     {profile.map((item) => (
                       <li key={item.name} onClick={handleLinkClick}>
-                        <Link
-                          to={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
+                        <Link to={item.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           {item.name}
                         </Link>
                       </li>
                     ))}
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </li>
                   </ul>
                 </div>
               )}
             </div>
+          ) : (
+            <Link to="/admin">
+              <HiUserCircle className="w-10 h-10 text-gray-400" />
+            </Link>
           )}
         </div>
       </div>
@@ -115,15 +127,18 @@ const Navbar = () => {
           <ul className="flex flex-col items-center py-2 bg-slate-200 dark:bg-gray-900">
             {navigation.map((item) => (
               <li key={item.name}>
-                <Link
-                  to={item.href}
-                  onClick={handleLinkClick}
-                  className="block py-2 px-3 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                >
+                <Link to={item.href} onClick={handleLinkClick} className="block py-2 px-3 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
                   {item.name}
                 </Link>
               </li>
             ))}
+            {!isLoggedIn && (
+              <li>
+                <Link to="/admin" className="block py-2 px-3 text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
+                  Admin Login
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       )}

@@ -7,6 +7,7 @@ import Logout from "../pages/user/Logout";
 import MatchesPage from "../pages/Matches";
 import DashboardPage from "../pages/Dashboard";
 import FightersPage from "../pages/Fighters";
+import AdminLogin from "../components/AdminLogin";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
          {
         path: "/logout",
         element: <Logout />
+      },
+      {
+        path: "/admin",
+        element: <AdminLogin/>
       },
     ]
   },

@@ -25,14 +25,25 @@ const MatchTable = () => {
   };
 
   const handleDeleteMatch = async (matchId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Bạn phải đăng nhập admin để xóa trận đấu');
+      return;
+    }
+
     if (!window.confirm('Bạn có chắc muốn xóa trận đấu này?')) return;
+
     setDeletingMatchId(matchId);
     try {
       await deleteMatch(matchId).unwrap();
       alert('Xóa trận đấu thành công!');
     } catch (err) {
       console.error(err);
-      alert('Xóa thất bại!');
+      if (err?.data?.message === 'Unauthorized') {
+        alert('Bạn không có quyền xóa trận đấu. Vui lòng đăng nhập admin.');
+      } else {
+        alert('Xóa thất bại!');
+      }
     } finally {
       setDeletingMatchId(null);
     }
@@ -49,7 +60,6 @@ const MatchTable = () => {
 
     return (
       <React.Fragment key={m._id}>
-        {/* Hàng Giáp Đỏ */}
         <tr className="odd:bg-white even:bg-gray-50">
           <td className="border p-2" rowSpan="2">{idx}</td>
           <td className="border p-2 text-red-600 font-semibold">{redFighter?.name || '—'}</td>
@@ -85,8 +95,6 @@ const MatchTable = () => {
             </button>
           </td>
         </tr>
-
-        {/* Hàng Giáp Xanh */}
         <tr className="odd:bg-white even:bg-gray-50">
           <td className="border p-2 text-blue-600 font-semibold">{blueFighter?.name || '—'}</td>
           <td className="border p-2">{blueFighter?.gender || '—'}</td>

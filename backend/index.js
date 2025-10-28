@@ -20,6 +20,8 @@ app.use(cors({
 app.use("/api/fighters", require("./src/routes/fighter.route"));
 app.use('/api/tournaments', require("./src/routes/tournament.route"));
 app.use('/api/matches', require("./src/routes/match.route"));
+app.use('/api/auth', require("./src/routes/adminAuth"));
+
 
 
 
