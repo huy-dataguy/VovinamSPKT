@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useFetchAllMatchesQuery, useUpdateResultMutation, useDeleteMatchMutation } from '../redux/features/matchAPI';
 
 const MatchTable = () => {
-  const { data: matches = [], isLoading, isError } = useFetchAllMatchesQuery();
+  const { data: matches = [], isLoading, isError, refetch } = useFetchAllMatchesQuery();
   const [updateResult] = useUpdateResultMutation();
   const [deleteMatch] = useDeleteMatchMutation();
   const [updatingMatchId, setUpdatingMatchId] = useState(null);
   const [deletingMatchId, setDeletingMatchId] = useState(null);
+  const [deletingAll, setDeletingAll] = useState(false);
 
   if (isLoading) return <p>Đang tải danh sách cặp đấu...</p>;
   if (isError) return <p>Lỗi khi tải cặp đấu</p>;
@@ -16,6 +17,7 @@ const MatchTable = () => {
     try {
       await updateResult({ id: match._id, result: { winner: winnerColor } }).unwrap();
       alert('Cập nhật kết quả thành công!');
+      refetch();
     } catch (err) {
       console.error(err);
       alert('Cập nhật thất bại!');
@@ -37,6 +39,7 @@ const MatchTable = () => {
     try {
       await deleteMatch(matchId).unwrap();
       alert('Xóa trận đấu thành công!');
+      refetch();
     } catch (err) {
       console.error(err);
       if (err?.data?.message === 'Unauthorized') {
@@ -46,6 +49,35 @@ const MatchTable = () => {
       }
     } finally {
       setDeletingMatchId(null);
+    }
+  };
+
+  const handleDeleteAllMatches = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Bạn phải đăng nhập admin để xóa các trận đấu.');
+      return;
+    }
+
+    if (matches.length === 0) {
+      alert('Không có trận nào để xóa.');
+      return;
+    }
+
+    if (!window.confirm('⚠️ Bạn có chắc muốn xóa TẤT CẢ các trận đấu không?')) return;
+
+    setDeletingAll(true);
+    try {
+      for (const m of matches) {
+        await deleteMatch(m._id).unwrap();
+      }
+      alert('✅ Đã xóa tất cả trận đấu!');
+      refetch();
+    } catch (err) {
+      console.error(err);
+      alert('❌ Lỗi khi xóa hàng loạt trận đấu.');
+    } finally {
+      setDeletingAll(false);
     }
   };
 
@@ -106,6 +138,19 @@ const MatchTable = () => {
 
   return (
     <div className="overflow-auto">
+      {/* Header controls */}
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-bold">Danh sách cặp đấu</h2>
+        <button
+          className={`bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 ${deletingAll ? 'opacity-60 cursor-not-allowed' : ''}`}
+          onClick={handleDeleteAllMatches}
+          disabled={deletingAll}
+        >
+          {deletingAll ? 'Đang xóa tất cả...' : '🗑️ Xóa tất cả trận đấu'}
+        </button>
+      </div>
+
+      {/* Match table */}
       <table className="w-full border-collapse border border-gray-300 text-center">
         <thead className="bg-gray-100">
           <tr>
@@ -119,8 +164,12 @@ const MatchTable = () => {
         </thead>
         <tbody>
           {matches.length === 0 ? (
-            <tr><td colSpan="6" className="p-4">Chưa có cặp đấu</td></tr>
-          ) : matches.map((m, idx) => renderRows(m, idx + 1))}
+            <tr>
+              <td colSpan="6" className="p-4">Chưa có cặp đấu</td>
+            </tr>
+          ) : (
+            matches.map((m, idx) => renderRows(m, idx + 1))
+          )}
         </tbody>
       </table>
     </div>

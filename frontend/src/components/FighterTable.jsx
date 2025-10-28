@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useDeleteFighterMutation, useUpdateFighterMutation } from '../redux/features/fighterAPI';
+import { useAddMatchMutation } from '../redux/features/matchAPI';
 
 const FighterTable = ({ fighters = [], selectable = false, onPairSelected, resetTrigger }) => {
   const [selected, setSelected] = useState({ fighter1: null, fighter2: null });
   const [editFighter, setEditFighter] = useState(null);
   const [formData, setFormData] = useState({ name: '', gender: '', weight: '', belt: '', club: '', birthYear: '' });
-  const [genderFilter, setGenderFilter] = useState('All'); // All / Nam / Nữ
+  const [genderFilter, setGenderFilter] = useState('All');
 
   const [deleteFighter] = useDeleteFighterMutation();
   const [updateFighter] = useUpdateFighterMutation();
+  const [addMatch] = useAddMatchMutation();
+
+  // Dùng cho auto pairing
+  const [tolerance, setTolerance] = useState(2);
+  const [autoPairs, setAutoPairs] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedPairs, setSelectedPairs] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleSelect = (id) => {
     if (!selectable) return;
@@ -64,14 +73,88 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
     }
   };
 
-  // Lọc và sắp xếp
+  // -----------------------------
+  // TỰ ĐỘNG GHÉP CẶP
+  // -----------------------------
+  const handleAutoPair = () => {
+    const pairs = [];
+    const grouped = fighters.reduce((acc, f) => {
+      acc[f.gender] = acc[f.gender] || [];
+      acc[f.gender].push(f);
+      return acc;
+    }, {});
+
+    Object.keys(grouped).forEach(gender => {
+      const sorted = [...grouped[gender]].sort((a, b) => a.weight - b.weight);
+      const used = new Set();
+
+      for (let i = 0; i < sorted.length; i++) {
+        if (used.has(sorted[i]._id)) continue;
+        for (let j = i + 1; j < sorted.length; j++) {
+          if (used.has(sorted[j]._id)) continue;
+          const diff = Math.abs(sorted[i].weight - sorted[j].weight);
+          if (diff <= tolerance) {
+            pairs.push({ gender, f1: sorted[i], f2: sorted[j] });
+            used.add(sorted[i]._id);
+            used.add(sorted[j]._id);
+            break;
+          }
+        }
+      }
+    });
+
+    if (pairs.length === 0) {
+      alert('Không tìm được cặp phù hợp với độ lệch này.');
+      return;
+    }
+
+    setAutoPairs(pairs);
+    const defaults = {};
+    pairs.forEach((_, i) => (defaults[i] = true));
+    setSelectedPairs(defaults);
+    setShowPopup(true);
+  };
+
+  const toggleAllPairs = (checked) => {
+    const newState = {};
+    autoPairs.forEach((_, i) => (newState[i] = checked));
+    setSelectedPairs(newState);
+  };
+
+  const handleConfirmMatch = async () => {
+    const confirmed = autoPairs.filter((_, idx) => selectedPairs[idx]);
+
+    if (confirmed.length === 0) {
+      alert('Chưa chọn cặp nào để xác nhận.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      for (const pair of confirmed) {
+        const payload = {
+          tournamentId: '671f45e8339d27ab4b8fbc01',
+          fighters: [pair.f1._id, pair.f2._id],
+          round: 'Vòng loại',
+        };
+        await addMatch(payload).unwrap();
+      }
+      alert('Tạo cặp đấu thành công!');
+      setShowPopup(false);
+    } catch (err) {
+      alert(`Lỗi: ${err?.data?.message || 'Không thể tạo match'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredFighters = fighters
     .filter(f => genderFilter === 'All' || f.gender === genderFilter)
     .sort((a, b) => a.weight - b.weight);
 
   return (
     <div>
-      {/* Filter */}
+      {/* Bộ lọc + tự động ghép cặp */}
       <div className="mb-4 flex gap-4 items-center">
         <label className="font-semibold">Bộ lọc</label>
         <select
@@ -83,8 +166,25 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           <option value="Nam">Nam</option>
           <option value="Nữ">Nữ</option>
         </select>
+
+        <div className="flex items-center gap-2">
+          <label>Độ lệch (kg):</label>
+          <input
+            type="number"
+            value={tolerance}
+            onChange={e => setTolerance(Number(e.target.value))}
+            className="border p-1 w-20 rounded"
+          />
+          <button
+            onClick={handleAutoPair}
+            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+          >
+            Tự động xếp cặp
+          </button>
+        </div>
       </div>
 
+      {/* Bảng võ sinh */}
       <div className="overflow-auto">
         <table className="w-full border-collapse border border-gray-300 text-center">
           <thead className="bg-gray-100">
@@ -102,7 +202,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           <tbody>
             {filteredFighters.length === 0 ? (
               <tr>
-                <td colSpan={selectable ? 8 : 7} className="p-4">Chưa có võ sinh</td>
+                <td colSpan={8} className="p-4">Chưa có võ sinh</td>
               </tr>
             ) : filteredFighters.map((f, i) => (
               <tr
@@ -137,7 +237,71 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
         </table>
       </div>
 
-      {/* Modal chỉnh sửa */}
+      {/* Popup đẹp như code 1 */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-[600px] p-6 max-h-[80vh] overflow-auto">
+            <h2 className="text-lg font-bold mb-4">Kết quả xếp cặp ngẫu nhiên</h2>
+
+            <div className="flex items-center mb-3">
+              <input
+                type="checkbox"
+                className="mr-2"
+                checked={Object.values(selectedPairs).every(v => v)}
+                onChange={e => toggleAllPairs(e.target.checked)}
+              />
+              <label>Xác nhận tất cả</label>
+            </div>
+
+            <table className="w-full border border-gray-300 text-center mb-4">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-2">Chọn</th>
+                  <th className="border p-2">Giới tính</th>
+                  <th className="border p-2">Võ sinh 1</th>
+                  <th className="border p-2">Võ sinh 2</th>
+                  <th className="border p-2">Chênh lệch (kg)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {autoPairs.map((pair, i) => (
+                  <tr key={i} className="odd:bg-white even:bg-gray-50">
+                    <td className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedPairs[i]}
+                        onChange={e => setSelectedPairs(prev => ({ ...prev, [i]: e.target.checked }))}
+                      />
+                    </td>
+                    <td className="border p-2">{pair.gender}</td>
+                    <td className="border p-2">{pair.f1.name} ({pair.f1.weight}kg)</td>
+                    <td className="border p-2">{pair.f2.name} ({pair.f2.weight}kg)</td>
+                    <td className="border p-2">{Math.abs(pair.f1.weight - pair.f2.weight)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="bg-gray-400 text-white px-3 py-1 rounded"
+                onClick={() => setShowPopup(false)}
+              >
+                Hủy
+              </button>
+              <button
+                disabled={loading}
+                className={`bg-blue-600 text-white px-3 py-1 rounded ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                onClick={handleConfirmMatch}
+              >
+                {loading ? 'Đang tạo...' : 'Xác nhận tạo trận'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal cập nhật võ sinh */}
       {editFighter && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg w-96">
