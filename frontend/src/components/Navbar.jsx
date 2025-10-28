@@ -10,7 +10,11 @@ const Navbar = () => {
 
   const navigation = [
     { name: 'Home', href: '/' },
+    { name: 'Fighters', href: '/fighters' },
+    { name: 'Matches', href: '/matches' },
+    { name: 'Dashboard', href: '/dashboard' },
     { name: 'VoviChat', href: '/vovichat' },
+
   ];
 
   const profile = [

@@ -4,6 +4,9 @@ import Home from "../pages/Home";
 import VoviChat from "../pages/VoviChat";
 import Profile from "../pages/user/Profile";
 import Logout from "../pages/user/Logout";
+import MatchesPage from "../pages/Matches";
+import DashboardPage from "../pages/Dashboard";
+import FightersPage from "../pages/Fighters";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +20,18 @@ const router = createBrowserRouter([
       {
         path: "/home",
         element: <Home />
+      },
+      {
+        path: "/fighters",
+        element: <FightersPage/>
+      },
+        {
+        path: "/matches",
+        element: <MatchesPage />
+      },
+        {
+        path: "/dashboard",
+        element: <DashboardPage />
       },
       {
         path: "/vovichat",

@@ -19,7 +19,7 @@ const fighterAPI = createApi({
     tagTypes: [''],
     endpoints: (builder) => ({
         fetchAllFighter: builder.query({
-            query: () => '/fighters',
+            query: () => '/',
             providesTags: ['Match'],
         }),
         addFighter: builder.mutation({
