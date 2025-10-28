@@ -19,12 +19,12 @@ const matchAPI = createApi({
   tagTypes: ['Match'],
   endpoints: (builder) => ({
     fetchAllMatches: builder.query({
-      query: () => '',
+      query: () => '', 
       providesTags: ['Match'],
     }),
     addMatch: builder.mutation({
       query: (newMatch) => ({
-        url: '/create',
+        url: '/create', 
         method: 'POST',
         body: newMatch,
       }),
@@ -32,8 +32,16 @@ const matchAPI = createApi({
     }),
     deleteMatch: builder.mutation({
       query: (id) => ({
-        url: `/${id}`,
+        url: `/${id}`, 
         method: 'DELETE',
+      }),
+      invalidatesTags: ['Match'],
+    }),
+    updateResult: builder.mutation({
+      query: ({ id, result }) => ({
+        url: `/${id}/result`, 
+        method: 'PUT',
+        body: result,
       }),
       invalidatesTags: ['Match'],
     }),
@@ -44,6 +52,7 @@ export const {
   useFetchAllMatchesQuery,
   useAddMatchMutation,
   useDeleteMatchMutation,
+  useUpdateResultMutation,
 } = matchAPI;
 
 export default matchAPI;

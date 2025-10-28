@@ -1,13 +1,13 @@
 import React from 'react';
 import { useFetchAllFighterQuery } from '../redux/features/fighterAPI';
-import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const DashboardPage = () => {
   const { data: fighters = [] } = useFetchAllFighterQuery();
 
   const genderData = [
-    { name: 'Nam', value: fighters.filter(f => f.gender === 'Nam').length },
-    { name: 'Nữ', value: fighters.filter(f => f.gender === 'Nữ').length },
+    { name: 'Nam', value: fighters.filter(f => f.gender === 'Nam').length, color: '#1E90FF' }, // xanh dương
+    { name: 'Nữ', value: fighters.filter(f => f.gender === 'Nữ').length, color: '#FF69B4' },  // hồng
   ];
 
   return (
@@ -24,7 +24,16 @@ const DashboardPage = () => {
           <h2 className="font-semibold text-xl mb-4 text-center">Tỉ lệ giới tính</h2>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
-              <Pie data={genderData} dataKey="value" nameKey="name" fill="#8884d8" label />
+              <Pie
+                data={genderData}
+                dataKey="value"
+                nameKey="name"
+                label
+              >
+                {genderData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>

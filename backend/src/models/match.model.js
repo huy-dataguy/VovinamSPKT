@@ -8,9 +8,7 @@ const MatchSchema = new mongoose.Schema({
   gender: { type: String, enum: ['Nam', 'Nữ'] },
   weightClass: { type: String },
   result: {
-    winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Fighter' },
-    score: { type: String },
-    method: { type: String },
+    winner: { type: String, enum: ['Đỏ', 'Xanh'] }, // chỉ lưu màu giáp thắng
   },
 }, { timestamps: true });
 

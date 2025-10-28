@@ -7,27 +7,34 @@ const FighterForm = () => {
     gender: '',
     weight: '',
     belt: '',
+    club: 'HCMUTE',
+    birthYear: '',
   });
 
   const [addFighter, { isLoading }] = useAddFighterMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
 
-    // chuyển weight về number
-    const payload = { 
-      ...formData, 
+    // Nếu club rỗng, mặc định HCMUTE
+    const payload = {
+      ...formData,
       weight: Number(formData.weight),
-      month,
-      year
+      club: formData.club || 'HCMUTE',
+      birthYear: formData.birthYear ? Number(formData.birthYear) : undefined,
     };
 
     try {
       await addFighter(payload).unwrap();
-      setFormData({ name: '', gender: '', weight: '', belt: '' });
+      setFormData({
+        name: '',
+        gender: '',
+        weight: '',
+        belt: '',
+        club: 'VovinamSPKT',
+        birthYear: '',
+      });
+      alert('Thêm võ sinh thành công!');
     } catch (err) {
       console.error('Lỗi thêm võ sinh:', err);
       alert('Thêm không thành công. Kiểm tra console để biết chi tiết.');
@@ -35,47 +42,46 @@ const FighterForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <label className="text-sm">Tên võ sinh</label>
-      <input
+    <form 
+      onSubmit={handleSubmit} 
+      className="flex flex-col gap-4 bg-white p-6 rounded-xl shadow-lg w-full max-w-md"
+    >
+      <input 
+        type="text" 
+        placeholder="Tên võ sinh" 
         value={formData.name}
-        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        onChange={(e) => setFormData({...formData, name: e.target.value})}
+        className="border p-2 rounded-md w-full"
         required
-        className="border p-2 rounded-md"
-        placeholder="Nhập họ tên"
       />
 
-      <label className="text-sm">Giới tính</label>
-      <select
+      <select 
         value={formData.gender}
-        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+        onChange={(e) => setFormData({...formData, gender: e.target.value})}
+        className="border p-2 rounded-md w-full"
         required
-        className="border p-2 rounded-md"
       >
-        <option value="">Chọn giới tính</option>
+        <option value="">Giới tính</option>
         <option value="Nam">Nam</option>
         <option value="Nữ">Nữ</option>
       </select>
 
-      <label className="text-sm">Cân nặng (kg)</label>
-      <input
-        type="number"
+      <input 
+        type="number" 
+        placeholder="Cân nặng (kg)" 
         value={formData.weight}
-        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+        onChange={(e) => setFormData({...formData, weight: e.target.value})}
+        className="border p-2 rounded-md w-full"
         required
-        min="0"
-        className="border p-2 rounded-md"
-        placeholder="Ví dụ: 65"
       />
 
-      <label className="text-sm">Cấp đai</label>
-      <select
+      <select 
         value={formData.belt}
-        onChange={(e) => setFormData({ ...formData, belt: e.target.value })}
+        onChange={(e) => setFormData({...formData, belt: e.target.value})}
+        className="border p-2 rounded-md w-full"
         required
-        className="border p-2 rounded-md"
       >
-        <option value="">Chọn cấp đai</option>
+        <option value="">Cấp đai hiện tại</option>
         <option value="Tự Vệ">Tự vệ</option>
         <option value="Lam đai">Lam đai</option>
         <option value="Lam đai I">Lam đai I</option>
@@ -86,11 +92,27 @@ const FighterForm = () => {
         <option value="Hoàng đai II">Hoàng đai II</option>
         <option value="Hoàng đai III">Hoàng đai III</option>
       </select>
+{/* 
+      <input
+        type="text"
+        placeholder="Câu lạc bộ"
+        value={formData.club}
+        onChange={(e) => setFormData({ ...formData, club: e.target.value })}
+        className="border p-2 rounded-md w-full"
+      /> */}
 
-      <button
-        type="submit"
+      <input
+        type="number"
+        placeholder="Năm sinh"
+        value={formData.birthYear}
+        onChange={(e) => setFormData({ ...formData, birthYear: e.target.value })}
+        className="border p-2 rounded-md w-full"
+      />
+
+      <button 
+        type="submit" 
+        className="btn-primary mt-2"
         disabled={isLoading}
-        className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-60"
       >
         {isLoading ? 'Đang gửi...' : 'Gửi đăng ký'}
       </button>
