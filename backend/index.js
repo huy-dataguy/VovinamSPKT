@@ -10,7 +10,7 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-    origin: ["http://localhost:5173", "https://vovinamspkt.vercel.app"],
+    origin: ["http://localhost:5173", "https://vovinamhcmute.vercel.app/"],
     credentials: true
 }))
 
