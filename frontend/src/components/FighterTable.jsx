@@ -10,7 +10,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   const [editFighter, setEditFighter] = useState(null);
   const [formData, setFormData] = useState({ name: '', gender: '', weight: '', belt: '', club: '', birthYear: '' });
   const [genderFilter, setGenderFilter] = useState('All');
-  const [sortByMatchCount, setSortByMatchCount] = useState('asc');
+  const [sortByMatchCount, setSortByMatchCount] = useState('none');
   const [tolerance, setTolerance] = useState(2);
   const [autoPairs, setAutoPairs] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -159,20 +159,19 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
       setLoading(false);
     }
   };
-
   const filteredFighters = fighters
     .filter(f => genderFilter === 'All' || f.gender === genderFilter)
     .sort((a, b) => {
       const countA = getMatchCount(a._id);
       const countB = getMatchCount(b._id);
 
-      // Ưu tiên sắp xếp theo số trận
+      if (sortByMatchCount === 'none') return a.weight - b.weight;
       if (sortByMatchCount === 'asc') return countA - countB;
       if (sortByMatchCount === 'desc') return countB - countA;
 
-      // Nếu số trận bằng nhau, sắp theo cân nặng
-      return a.weight - b.weight;
+      return 0;
     });
+
 
 
   return (
@@ -190,14 +189,15 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           <option value="Nữ">Nữ</option>
         </select>
         <div className="flex items-center gap-2">
-  <label>Sắp xếp:</label>
+  <label className="font-semibold">Số trận</label>
   <select
     className="border p-1 rounded"
     value={sortByMatchCount}
     onChange={(e) => setSortByMatchCount(e.target.value)}
-  >
-    <option value="asc">Ít → Nhiều trận</option>
-    <option value="desc">Nhiều → Ít trận</option>
+  >    
+    <option value="none"> Không</option>
+    <option value="asc">Tăng</option>
+    <option value="desc">Giảm</option>
   </select>
 </div>
 
