@@ -12,12 +12,18 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   const [updateFighter] = useUpdateFighterMutation();
   const [addMatch] = useAddMatchMutation();
 
-  // Dùng cho auto pairing
   const [tolerance, setTolerance] = useState(2);
   const [autoPairs, setAutoPairs] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPairs, setSelectedPairs] = useState({});
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // ✅ Kiểm tra token để xác định quyền admin
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAdmin(!!token);
+  }, []);
 
   const handleSelect = (id) => {
     if (!selectable) return;
@@ -38,19 +44,23 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
   useEffect(() => setSelected({ fighter1: null, fighter2: null }), [resetTrigger]);
 
+  // ================== QUẢN LÝ ==================
   const handleDelete = async (id) => {
+    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để xóa võ sinh.');
+
     if (window.confirm('Bạn có chắc muốn xóa võ sinh này?')) {
       try {
         await deleteFighter(id).unwrap();
-        alert('Xóa thành công!');
+        alert('✅ Xóa thành công!');
       } catch (err) {
         console.error(err);
-        alert('Xóa thất bại!');
+        alert('❌ Xóa thất bại!');
       }
     }
   };
 
   const handleEdit = (fighter) => {
+    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để chỉnh sửa.');
     setEditFighter(fighter);
     setFormData({
       name: fighter.name,
@@ -63,20 +73,22 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleSave = async () => {
+    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để lưu thay đổi.');
+
     try {
       await updateFighter({ id: editFighter._id, ...formData }).unwrap();
-      alert('Cập nhật thành công!');
+      alert('✅ Cập nhật thành công!');
       setEditFighter(null);
     } catch (err) {
       console.error(err);
-      alert('Cập nhật thất bại!');
+      alert('❌ Cập nhật thất bại!');
     }
   };
 
-  // -----------------------------
-  // TỰ ĐỘNG GHÉP CẶP
-  // -----------------------------
+  // ================== GHÉP CẶP ==================
   const handleAutoPair = () => {
+    if (!isAdmin) return alert('⚠️ Chỉ admin mới có thể tự động xếp cặp.');
+
     const pairs = [];
     const grouped = fighters.reduce((acc, f) => {
       acc[f.gender] = acc[f.gender] || [];
@@ -87,7 +99,6 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
     Object.keys(grouped).forEach(gender => {
       const sorted = [...grouped[gender]].sort((a, b) => a.weight - b.weight);
       const used = new Set();
-
       for (let i = 0; i < sorted.length; i++) {
         if (used.has(sorted[i]._id)) continue;
         for (let j = i + 1; j < sorted.length; j++) {
@@ -103,10 +114,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
       }
     });
 
-    if (pairs.length === 0) {
-      alert('Không tìm được cặp phù hợp với độ lệch này.');
-      return;
-    }
+    if (pairs.length === 0) return alert('❌ Không tìm được cặp phù hợp.');
 
     setAutoPairs(pairs);
     const defaults = {};
@@ -122,12 +130,10 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleConfirmMatch = async () => {
-    const confirmed = autoPairs.filter((_, idx) => selectedPairs[idx]);
+    if (!isAdmin) return alert('⚠️ Chỉ admin mới có thể xác nhận tạo trận.');
 
-    if (confirmed.length === 0) {
-      alert('Chưa chọn cặp nào để xác nhận.');
-      return;
-    }
+    const confirmed = autoPairs.filter((_, idx) => selectedPairs[idx]);
+    if (confirmed.length === 0) return alert('Chưa chọn cặp nào.');
 
     try {
       setLoading(true);
@@ -139,10 +145,10 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
         };
         await addMatch(payload).unwrap();
       }
-      alert('Tạo cặp đấu thành công!');
+      alert('✅ Tạo cặp đấu thành công!');
       setShowPopup(false);
     } catch (err) {
-      alert(`Lỗi: ${err?.data?.message || 'Không thể tạo match'}`);
+      alert(`❌ Lỗi: ${err?.data?.message || 'Không thể tạo trận'}`);
     } finally {
       setLoading(false);
     }
@@ -155,7 +161,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   return (
     <div>
       {/* Bộ lọc + tự động ghép cặp */}
-      <div className="mb-4 flex gap-4 items-center">
+      <div className="mb-4 flex gap-4 items-center flex-wrap">
         <label className="font-semibold">Bộ lọc</label>
         <select
           className="border p-1 rounded"
@@ -177,7 +183,9 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           />
           <button
             onClick={handleAutoPair}
-            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+            className={`px-3 py-1 rounded text-white ${
+              isAdmin ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+            }`}
           >
             Tự động xếp cặp
           </button>
@@ -226,10 +234,26 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 <td className="border p-2">{f.weight}</td>
                 <td className="border p-2">{f.belt}</td>
                 <td className="border p-2">
-                  <button className="bg-yellow-400 px-2 py-1 rounded" onClick={() => handleEdit(f)}>Cập nhật</button>
+                  <button
+                    className={`px-2 py-1 rounded ${
+                      isAdmin ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-gray-300 cursor-not-allowed'
+                    }`}
+                    onClick={() => handleEdit(f)}
+                    disabled={!isAdmin}
+                  >
+                    Cập nhật
+                  </button>
                 </td>
                 <td className="border p-2">
-                  <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDelete(f._id)}>Xóa</button>
+                  <button
+                    className={`px-2 py-1 rounded text-white ${
+                      isAdmin ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                    onClick={() => handleDelete(f._id)}
+                    disabled={!isAdmin}
+                  >
+                    Xóa
+                  </button>
                 </td>
               </tr>
             ))}
@@ -237,12 +261,11 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
         </table>
       </div>
 
-      {/* Popup đẹp như code 1 */}
+      {/* Popup ghép cặp */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-[600px] p-6 max-h-[80vh] overflow-auto">
-            <h2 className="text-lg font-bold mb-4">Kết quả xếp cặp ngẫu nhiên</h2>
-
+            <h2 className="text-lg font-bold mb-4">Kết quả xếp cặp</h2>
             <div className="flex items-center mb-3">
               <input
                 type="checkbox"
@@ -250,7 +273,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 checked={Object.values(selectedPairs).every(v => v)}
                 onChange={e => toggleAllPairs(e.target.checked)}
               />
-              <label>Xác nhận tất cả</label>
+              <label>Chọn tất cả</label>
             </div>
 
             <table className="w-full border border-gray-300 text-center mb-4">
@@ -290,8 +313,12 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 Hủy
               </button>
               <button
-                disabled={loading}
-                className={`bg-blue-600 text-white px-3 py-1 rounded ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                disabled={loading || !isAdmin}
+                className={`text-white px-3 py-1 rounded ${
+                  isAdmin
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-gray-400 cursor-not-allowed'
+                }`}
                 onClick={handleConfirmMatch}
               >
                 {loading ? 'Đang tạo...' : 'Xác nhận tạo trận'}

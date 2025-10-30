@@ -46,7 +46,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-slate-200 dark:bg-gray-900 border-gray-200">
+    // <nav className="bg-slate-200 dark:bg-gray-900 border-gray-200">
+    <nav className="fixed top-0 left-0 w-full bg-slate-200 dark:bg-gray-900 border-gray-200 z-50">
+
       <div className="max-w-screen-xl mx-auto flex items-center justify-between p-4">
         {/* Left side: Logo + Mobile menu button */}
         <div className="flex items-center space-x-2">

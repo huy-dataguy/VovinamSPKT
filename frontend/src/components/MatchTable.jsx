@@ -33,7 +33,7 @@ const MatchTable = () => {
       return;
     }
 
-    if (!window.confirm('Bạn có chắc muốn xóa trận đấu này?')) return;
+    // if (!window.confirm('Bạn có chắc muốn xóa trận đấu này?')) return;
 
     setDeletingMatchId(matchId);
     try {
