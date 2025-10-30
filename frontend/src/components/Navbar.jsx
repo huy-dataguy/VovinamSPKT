@@ -15,7 +15,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: 'Home', href: '/' },
+    // { name: 'Home', href: '/' },
     { name: 'Fighters', href: '/fighters' },
     { name: 'Matches', href: '/matches' },
     { name: 'Dashboard', href: '/dashboard' },
@@ -110,44 +110,45 @@ const Navbar = () => {
 
       {/* Menu mobile (dropdown) */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-indigo-800/90 backdrop-blur-lg border-t border-indigo-400/30 animate-fadeIn">
-          <ul className="flex flex-col space-y-2 p-4">
-            {navigation.map((item) => (
-              <li key={item.name}>
-                <Link
-                  to={item.href}
-                  className="block py-2 px-3 text-white hover:text-yellow-300 transition"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
+  <div className="md:hidden bg-gradient-to-b from-indigo-500/70 via-purple-500/50 to-transparent backdrop-blur-md border-t border-indigo-300/30 animate-fadeIn shadow-lg">
+    <ul className="flex flex-col space-y-2 p-4">
+      {navigation.map((item) => (
+        <li key={item.name}>
+          <Link
+            to={item.href}
+            className="block py-2 px-3 text-white/90 hover:text-yellow-200 transition"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            {item.name}
+          </Link>
+        </li>
+      ))}
 
-            <li className="pt-3 border-t border-indigo-500/30">
-              {isLoggedIn ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full text-left py-2 px-3 text-red-300 hover:text-red-400 transition"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to="/admin"
-                  className="block py-2 px-3 text-yellow-300 hover:text-white"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Login
-                </Link>
-              )}
-            </li>
-          </ul>
-        </div>
-      )}
+      <li className="pt-3 border-t border-indigo-300/30">
+        {isLoggedIn ? (
+          <button
+            onClick={() => {
+              handleLogout();
+              setIsMobileMenuOpen(false);
+            }}
+            className="w-full text-left py-2 px-3 text-red-300 hover:text-red-400 transition"
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            to="/admin"
+            className="block py-2 px-3 text-yellow-300 hover:text-white transition"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Login
+          </Link>
+        )}
+      </li>
+    </ul>
+  </div>
+)}
+
     </nav>
   );
 };
