@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useDeleteFighterMutation, useUpdateFighterMutation } from '../redux/features/fighterAPI';
 import { useAddMatchMutation } from '../redux/features/matchAPI';
 import { useAuth } from '../context/AuthContext'; // ✅ Thêm dòng này
+import { useFetchAllMatchesQuery } from '../redux/features/matchAPI';
+
 
 const FighterTable = ({ fighters = [], selectable = false, onPairSelected, resetTrigger }) => {
   const [selected, setSelected] = useState({ fighter1: null, fighter2: null });
   const [editFighter, setEditFighter] = useState(null);
   const [formData, setFormData] = useState({ name: '', gender: '', weight: '', belt: '', club: '', birthYear: '' });
   const [genderFilter, setGenderFilter] = useState('All');
+  const [sortByMatchCount, setSortByMatchCount] = useState('asc');
   const [tolerance, setTolerance] = useState(2);
   const [autoPairs, setAutoPairs] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -18,6 +21,14 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   const [updateFighter] = useUpdateFighterMutation();
   const [addMatch] = useAddMatchMutation();
   const { isLoggedIn } = useAuth(); // ✅ Lấy trạng thái đăng nhập từ context
+
+
+  const { data: matches = [] } = useFetchAllMatchesQuery();
+
+  const getMatchCount = (fighterId) =>
+    matches.filter(m => m.fighters?.some(f => f?._id === fighterId)).length;
+
+
 
   // ================== CHỌN CẶP ==================
   const handleSelect = (id) => {
@@ -151,7 +162,18 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
   const filteredFighters = fighters
     .filter(f => genderFilter === 'All' || f.gender === genderFilter)
-    .sort((a, b) => a.weight - b.weight);
+    .sort((a, b) => {
+      const countA = getMatchCount(a._id);
+      const countB = getMatchCount(b._id);
+
+      // Ưu tiên sắp xếp theo số trận
+      if (sortByMatchCount === 'asc') return countA - countB;
+      if (sortByMatchCount === 'desc') return countB - countA;
+
+      // Nếu số trận bằng nhau, sắp theo cân nặng
+      return a.weight - b.weight;
+    });
+
 
   return (
     <div>
@@ -167,6 +189,18 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           <option value="Nam">Nam</option>
           <option value="Nữ">Nữ</option>
         </select>
+        <div className="flex items-center gap-2">
+  <label>Sắp xếp:</label>
+  <select
+    className="border p-1 rounded"
+    value={sortByMatchCount}
+    onChange={(e) => setSortByMatchCount(e.target.value)}
+  >
+    <option value="asc">Ít → Nhiều trận</option>
+    <option value="desc">Nhiều → Ít trận</option>
+  </select>
+</div>
+
 
         <div className="flex items-center gap-2">
           <label>Độ lệch (kg):</label>
@@ -195,8 +229,9 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
               <th className="border p-2">#</th>
               {selectable && <th className="border p-2">Chọn</th>}
               <th className="border p-2">Tên</th>
-              <th className="border p-2">Giới tính</th>
+              <th className="border p-2">Số trận</th>
               <th className="border p-2">Cân nặng (kg)</th>
+              <th className="border p-2">Giới tính</th>
               <th className="border p-2">Cấp đai</th>
               <th className="border p-2">Cập nhật</th>
               <th className="border p-2">Xóa</th>
@@ -225,8 +260,9 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                   </td>
                 )}
                 <td className="border p-2">{f.name}</td>
-                <td className="border p-2">{f.gender}</td>
+                <td className="border p-2">{getMatchCount(f._id)}</td>
                 <td className="border p-2">{f.weight}</td>
+                <td className="border p-2">{f.gender}</td>
                 <td className="border p-2">{f.belt}</td>
                 <td className="border p-2">
                   <button
