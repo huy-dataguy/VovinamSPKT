@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FighterForm from '../components/FighterForm';
 import FighterTable from '../components/FighterTable';
 import { useFetchAllFighterQuery } from '../redux/features/fighterAPI';
 import { useAddMatchMutation } from '../redux/features/matchAPI';
+import { useAuth } from '../context/AuthContext'; // ✅ dùng auth context
 
 const FightersPage = () => {
   const { data: fighters = [], isLoading, isError } = useFetchAllFighterQuery();
@@ -10,21 +11,17 @@ const FightersPage = () => {
   const [pair, setPair] = useState([]); // chứa 2 fighterId
   const [loading, setLoading] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  // ✅ Kiểm tra token (admin login)
-  useEffect(() => {
-    setIsAdmin(!!localStorage.getItem('token'));
-  }, []);
+  const { isLoggedIn } = useAuth(); // ✅ lấy trạng thái đăng nhập từ context
 
   const handleConfirmPair = async () => {
-    if (!isAdmin) {
+    if (!isLoggedIn) {
       alert('❌ Chỉ admin mới có thể xác nhận cặp đấu.');
       return;
     }
 
     if (pair.length !== 2) {
-      alert('Vui lòng chọn đủ 2 võ sinh để tạo cặp đấu.');
+      alert('⚠️ Vui lòng chọn đủ 2 võ sinh để tạo cặp đấu.');
       return;
     }
 
@@ -57,12 +54,14 @@ const FightersPage = () => {
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full max-w-6xl">
+        {/* Form thêm võ sinh */}
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <FighterForm />
         </div>
 
+        {/* Bảng võ sinh */}
         <div className="bg-white p-6 rounded-2xl shadow-lg overflow-auto">
-          {isAdmin ? (
+          {isLoggedIn ? (
             <button
               onClick={handleConfirmPair}
               disabled={pair.length !== 2 || loading}
@@ -72,7 +71,7 @@ const FightersPage = () => {
             </button>
           ) : (
             <p className="mb-6 mt-4 text-center text-gray-500">
-              Admin mới có quyền sửa, tạo cặp đấu.
+            Admin mới có quyền delete, update, create
             </p>
           )}
 

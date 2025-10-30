@@ -1,33 +1,30 @@
-// src/context/AuthContext.js
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
 
-  // Login: lưu token & update state
-  const loginUser = (token) => {
-    localStorage.setItem('token', token);
-    setCurrentUser({ token });
-  };
-
-  // Logout: xóa token & update state
-  const logoutUser = () => {
-    localStorage.removeItem('token');
-    setCurrentUser(null);
-  };
-
-  // Khi app load, kiểm tra token
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) setCurrentUser({ token });
-  }, []);
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
+  const login = (newToken) => {
+    setToken(newToken);
+  };
+
+  const logout = () => {
+    setToken(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ currentUser, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ token, isLoggedIn: !!token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

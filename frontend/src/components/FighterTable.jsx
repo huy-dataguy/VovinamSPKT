@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useDeleteFighterMutation, useUpdateFighterMutation } from '../redux/features/fighterAPI';
 import { useAddMatchMutation } from '../redux/features/matchAPI';
+import { useAuth } from '../context/AuthContext'; // ✅ Thêm dòng này
 
 const FighterTable = ({ fighters = [], selectable = false, onPairSelected, resetTrigger }) => {
   const [selected, setSelected] = useState({ fighter1: null, fighter2: null });
   const [editFighter, setEditFighter] = useState(null);
   const [formData, setFormData] = useState({ name: '', gender: '', weight: '', belt: '', club: '', birthYear: '' });
   const [genderFilter, setGenderFilter] = useState('All');
-
-  const [deleteFighter] = useDeleteFighterMutation();
-  const [updateFighter] = useUpdateFighterMutation();
-  const [addMatch] = useAddMatchMutation();
-
   const [tolerance, setTolerance] = useState(2);
   const [autoPairs, setAutoPairs] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPairs, setSelectedPairs] = useState({});
   const [loading, setLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  // ✅ Kiểm tra token để xác định quyền admin
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAdmin(!!token);
-  }, []);
+  const [deleteFighter] = useDeleteFighterMutation();
+  const [updateFighter] = useUpdateFighterMutation();
+  const [addMatch] = useAddMatchMutation();
+  const { isLoggedIn } = useAuth(); // ✅ Lấy trạng thái đăng nhập từ context
 
+  // ================== CHỌN CẶP ==================
   const handleSelect = (id) => {
     if (!selectable) return;
     if (selected.fighter1 === id) setSelected(prev => ({ ...prev, fighter1: null }));
@@ -46,7 +41,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
   // ================== QUẢN LÝ ==================
   const handleDelete = async (id) => {
-    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để xóa võ sinh.');
+    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để xóa võ sinh.');
 
     if (window.confirm('Bạn có chắc muốn xóa võ sinh này?')) {
       try {
@@ -60,7 +55,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleEdit = (fighter) => {
-    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để chỉnh sửa.');
+    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để chỉnh sửa.');
     setEditFighter(fighter);
     setFormData({
       name: fighter.name,
@@ -73,7 +68,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleSave = async () => {
-    if (!isAdmin) return alert('⚠️ Bạn cần đăng nhập admin để lưu thay đổi.');
+    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để lưu thay đổi.');
 
     try {
       await updateFighter({ id: editFighter._id, ...formData }).unwrap();
@@ -87,7 +82,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
   // ================== GHÉP CẶP ==================
   const handleAutoPair = () => {
-    if (!isAdmin) return alert('⚠️ Chỉ admin mới có thể tự động xếp cặp.');
+    if (!isLoggedIn) return alert('⚠️ Chỉ admin mới có thể tự động xếp cặp.');
 
     const pairs = [];
     const grouped = fighters.reduce((acc, f) => {
@@ -130,7 +125,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleConfirmMatch = async () => {
-    if (!isAdmin) return alert('⚠️ Chỉ admin mới có thể xác nhận tạo trận.');
+    if (!isLoggedIn) return alert('⚠️ Chỉ admin mới có thể xác nhận tạo trận.');
 
     const confirmed = autoPairs.filter((_, idx) => selectedPairs[idx]);
     if (confirmed.length === 0) return alert('Chưa chọn cặp nào.');
@@ -184,7 +179,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
           <button
             onClick={handleAutoPair}
             className={`px-3 py-1 rounded text-white ${
-              isAdmin ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+              isLoggedIn ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
             }`}
           >
             Tự động xếp cặp
@@ -236,10 +231,10 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 <td className="border p-2">
                   <button
                     className={`px-2 py-1 rounded ${
-                      isAdmin ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-gray-300 cursor-not-allowed'
+                      isLoggedIn ? 'bg-yellow-400 hover:bg-yellow-500' : 'bg-gray-300 cursor-not-allowed'
                     }`}
                     onClick={() => handleEdit(f)}
-                    disabled={!isAdmin}
+                    disabled={!isLoggedIn}
                   >
                     Cập nhật
                   </button>
@@ -247,10 +242,10 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 <td className="border p-2">
                   <button
                     className={`px-2 py-1 rounded text-white ${
-                      isAdmin ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'
+                      isLoggedIn ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-400 cursor-not-allowed'
                     }`}
                     onClick={() => handleDelete(f._id)}
-                    disabled={!isAdmin}
+                    disabled={!isLoggedIn}
                   >
                     Xóa
                   </button>
@@ -313,9 +308,9 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
                 Hủy
               </button>
               <button
-                disabled={loading || !isAdmin}
+                disabled={loading || !isLoggedIn}
                 className={`text-white px-3 py-1 rounded ${
-                  isAdmin
+                  isLoggedIn
                     ? 'bg-blue-600 hover:bg-blue-700'
                     : 'bg-gray-400 cursor-not-allowed'
                 }`}
