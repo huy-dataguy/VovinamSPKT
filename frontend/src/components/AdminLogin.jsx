@@ -18,7 +18,7 @@ const AdminLogin = () => {
 
       if (token) {
         login(token); // ✅ cập nhật context + localStorage
-        alert("Admin Login successful!");
+        // alert("Admin Login successful!");
         navigate("/fighters");
       }
     } catch {
