@@ -64,18 +64,18 @@ const MatchTable = () => {
       return;
     }
 
-    if (!window.confirm('⚠️ Bạn có chắc muốn xóa TẤT CẢ các trận đấu không?')) return;
+    if (!window.confirm('Bạn có chắc muốn xóa TẤT CẢ các trận đấu không?')) return;
 
     setDeletingAll(true);
     try {
       for (const m of matches) {
         await deleteMatch(m._id).unwrap();
       }
-      alert('✅ Đã xóa tất cả trận đấu!');
+      alert('Đã xóa tất cả trận đấu!');
       refetch();
     } catch (err) {
       console.error(err);
-      alert('❌ Lỗi khi xóa hàng loạt trận đấu.');
+      alert('Lỗi khi xóa hàng loạt trận đấu.');
     } finally {
       setDeletingAll(false);
     }

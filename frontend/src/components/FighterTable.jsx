@@ -41,21 +41,21 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
   // ================== QUẢN LÝ ==================
   const handleDelete = async (id) => {
-    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để xóa võ sinh.');
+    if (!isLoggedIn) return alert('Bạn cần đăng nhập admin để xóa võ sinh.');
 
     if (window.confirm('Bạn có chắc muốn xóa võ sinh này?')) {
       try {
         await deleteFighter(id).unwrap();
-        alert('✅ Xóa thành công!');
+        alert('Xóa thành công!');
       } catch (err) {
         console.error(err);
-        alert('❌ Xóa thất bại!');
+        alert('Xóa thất bại!');
       }
     }
   };
 
   const handleEdit = (fighter) => {
-    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để chỉnh sửa.');
+    if (!isLoggedIn) return alert('Bạn cần đăng nhập admin để chỉnh sửa.');
     setEditFighter(fighter);
     setFormData({
       name: fighter.name,
@@ -68,21 +68,21 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleSave = async () => {
-    if (!isLoggedIn) return alert('⚠️ Bạn cần đăng nhập admin để lưu thay đổi.');
+    if (!isLoggedIn) return alert('Bạn cần đăng nhập admin để lưu thay đổi.');
 
     try {
       await updateFighter({ id: editFighter._id, ...formData }).unwrap();
-      alert('✅ Cập nhật thành công!');
+      alert('Cập nhật thành công!');
       setEditFighter(null);
     } catch (err) {
       console.error(err);
-      alert('❌ Cập nhật thất bại!');
+      alert('Cập nhật thất bại!');
     }
   };
 
   // ================== GHÉP CẶP ==================
   const handleAutoPair = () => {
-    if (!isLoggedIn) return alert('⚠️ Chỉ admin mới có thể tự động xếp cặp.');
+    if (!isLoggedIn) return alert('Chỉ admin mới có thể tự động xếp cặp.');
 
     const pairs = [];
     const grouped = fighters.reduce((acc, f) => {
@@ -109,7 +109,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
       }
     });
 
-    if (pairs.length === 0) return alert('❌ Không tìm được cặp phù hợp.');
+    if (pairs.length === 0) return alert('Không tìm được cặp phù hợp.');
 
     setAutoPairs(pairs);
     const defaults = {};
@@ -125,7 +125,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   };
 
   const handleConfirmMatch = async () => {
-    if (!isLoggedIn) return alert('⚠️ Chỉ admin mới có thể xác nhận tạo trận.');
+    if (!isLoggedIn) return alert('Chỉ admin mới có thể xác nhận tạo trận.');
 
     const confirmed = autoPairs.filter((_, idx) => selectedPairs[idx]);
     if (confirmed.length === 0) return alert('Chưa chọn cặp nào.');
@@ -140,10 +140,10 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
         };
         await addMatch(payload).unwrap();
       }
-      alert('✅ Tạo cặp đấu thành công!');
+      alert('Tạo cặp đấu thành công!');
       setShowPopup(false);
     } catch (err) {
-      alert(`❌ Lỗi: ${err?.data?.message || 'Không thể tạo trận'}`);
+      alert(`Lỗi: ${err?.data?.message || 'Không thể tạo trận'}`);
     } finally {
       setLoading(false);
     }
