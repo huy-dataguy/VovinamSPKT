@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.4; transform: translateX(-10%); }
+  50% { opacity: 1; transform: translateX(10%); }
+  100% { opacity: 0.4; transform: translateX(-10%); }
+}
+
+.animate-gradientMove {
+  background-size: 200% 200%;
+  animation: gradientMove 4s ease infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
