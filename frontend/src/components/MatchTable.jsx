@@ -96,6 +96,8 @@ const MatchTable = () => {
           <td className="border p-2" rowSpan="2">{idx}</td>
           <td className="border p-2 text-red-600 font-semibold">{redFighter?.name || '—'}</td>
           <td className="border p-2">{redFighter?.gender || '—'}</td>
+          <td className="border p-2">{redFighter?.belt || '—'}</td>
+
           <td className="border p-2">{redFighter?.weight || '—'}</td>
           <td className="border p-2" rowSpan="2">
             {!winner ? (
@@ -130,6 +132,8 @@ const MatchTable = () => {
         <tr className="odd:bg-white even:bg-gray-50">
           <td className="border p-2 text-blue-600 font-semibold">{blueFighter?.name || '—'}</td>
           <td className="border p-2">{blueFighter?.gender || '—'}</td>
+          <td className="border p-2">{blueFighter?.belt || '—'}</td>
+
           <td className="border p-2">{blueFighter?.weight || '—'}</td>
         </tr>
       </React.Fragment>
@@ -157,6 +161,8 @@ const MatchTable = () => {
             <th className="border p-2">Cặp đấu</th>
             <th className="border p-2">Tên võ sinh</th>
             <th className="border p-2">Giới tính</th>
+            <th className="border p-2">Cấp đai</th>
+
             <th className="border p-2">Cân nặng</th>
             <th className="border p-2">Kết quả</th>
             <th className="border p-2">Xóa trận</th>
