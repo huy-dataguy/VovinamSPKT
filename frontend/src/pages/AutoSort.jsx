@@ -258,8 +258,8 @@ const AutoSort = () => {
                   <td className="border p-2 font-semibold">{idx + 1}</td>
                   <td className="border p-2">{p.gender}</td>
                   <td className="border p-2">{p.cls}</td>
-                  <td className="border p-2">{p.f1.name} ({p.f1.weight}kg)</td>
-                  <td className="border p-2">{p.f2.name} ({p.f2.weight}kg)</td>
+                  <td className="border p-2">{p.f1.name} ({p.f1.weight}kg) {p.f1.belt}</td>
+                  <td className="border p-2">{p.f2.name} ({p.f2.weight}kg) {p.f2.belt}</td>
                 </tr>
               ))}
             </tbody>
