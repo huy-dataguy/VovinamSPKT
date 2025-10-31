@@ -74,6 +74,7 @@ const AutoSort = () => {
       ['Tự Vệ', 'Lam đai', 'Lam đai I'].includes(fighter.belt) ? 1 : 2;
 
     const addPair = (f1, f2, gender, cls) => {
+      if (f1.belt === 'Tự Vệ' && f2.belt === 'Tự Vệ') return;
       if (!f1 || !f2 || f1._id === f2._id) return;
       const f1Limit = getMaxMatches(f1);
       const f2Limit = getMaxMatches(f2);
