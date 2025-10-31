@@ -4,8 +4,13 @@ import FighterTable from '../components/FighterTable';
 import { useFetchAllFighterQuery } from '../redux/features/fighterAPI';
 import { useAddMatchMutation } from '../redux/features/matchAPI';
 import { useAuth } from '../context/AuthContext'; // ✅ dùng auth context
+import { Outlet, useLocation } from 'react-router-dom'; // 🟢 thêm useLocation// 
 
 const FightersPage = () => {
+  const location = useLocation(); // 🟢 xác định đang ở route con nào
+    if (location.pathname.includes('auto-sort')) {
+    return <Outlet />;
+  }
   const { data: fighters = [], isLoading, isError } = useFetchAllFighterQuery();
   const [addMatch] = useAddMatchMutation();
   const [pair, setPair] = useState([]); // chứa 2 fighterId
@@ -82,6 +87,8 @@ const FightersPage = () => {
             resetTrigger={resetTrigger}
           />
         </div>
+        <Outlet />
+
       </div>
     </div>
   );

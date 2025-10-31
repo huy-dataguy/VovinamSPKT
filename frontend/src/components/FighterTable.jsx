@@ -3,6 +3,8 @@ import { useDeleteFighterMutation, useUpdateFighterMutation } from '../redux/fea
 import { useAddMatchMutation } from '../redux/features/matchAPI';
 import { useAuth } from '../context/AuthContext'; // ✅ Thêm dòng này
 import { useFetchAllMatchesQuery } from '../redux/features/matchAPI';
+import { useNavigate } from 'react-router-dom'; // ✅ thêm import
+import { Outlet } from "react-router-dom";
 
 
 const FighterTable = ({ fighters = [], selectable = false, onPairSelected, resetTrigger }) => {
@@ -16,6 +18,7 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPairs, setSelectedPairs] = useState({});
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const [deleteFighter] = useDeleteFighterMutation();
   const [updateFighter] = useUpdateFighterMutation();
@@ -91,48 +94,41 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
     }
   };
 
-  // ================== GHÉP CẶP ==================
   const handleAutoPair = () => {
     if (!isLoggedIn) return alert('Chỉ admin mới có thể tự động xếp cặp.');
 
-    const pairs = [];
-    const grouped = fighters.reduce((acc, f) => {
-      acc[f.gender] = acc[f.gender] || [];
-      acc[f.gender].push(f);
-      return acc;
-    }, {});
+    // const pairs = [];
+    // const grouped = fighters.reduce((acc, f) => {
+    //   acc[f.gender] = acc[f.gender] || [];
+    //   acc[f.gender].push(f);
+    //   return acc;
+    // }, {});
 
-    Object.keys(grouped).forEach(gender => {
-      const sorted = [...grouped[gender]].sort((a, b) => a.weight - b.weight);
-      const used = new Set();
-      for (let i = 0; i < sorted.length; i++) {
-        if (used.has(sorted[i]._id)) continue;
-        for (let j = i + 1; j < sorted.length; j++) {
-          if (used.has(sorted[j]._id)) continue;
-          const diff = Math.abs(sorted[i].weight - sorted[j].weight);
-          if (diff <= tolerance) {
-            pairs.push({ gender, f1: sorted[i], f2: sorted[j] });
-            used.add(sorted[i]._id);
-            used.add(sorted[j]._id);
-            break;
-          }
-        }
-      }
-    });
+    // Object.keys(grouped).forEach(gender => {
+    //   const sorted = [...grouped[gender]].sort((a, b) => a.weight - b.weight);
+    //   const used = new Set();
+    //   for (let i = 0; i < sorted.length; i++) {
+    //     if (used.has(sorted[i]._id)) continue;
+    //     for (let j = i + 1; j < sorted.length; j++) {
+    //       if (used.has(sorted[j]._id)) continue;
+    //       const diff = Math.abs(sorted[i].weight - sorted[j].weight);
+    //       if (diff <= tolerance) {
+    //         pairs.push({ gender, f1: sorted[i], f2: sorted[j] });
+    //         used.add(sorted[i]._id);
+    //         used.add(sorted[j]._id);
+    //         break;
+    //       }
+    //     }
+    //   }
+    // });
+    if (!fighters || fighters.length === 0)
+    return alert('Không có võ sinh để xếp cặp.');
 
-    if (pairs.length === 0) return alert('Không tìm được cặp phù hợp.');
+    // if (pairs.length === 0) return alert('Không tìm được cặp phù hợp.');
 
-    setAutoPairs(pairs);
-    const defaults = {};
-    pairs.forEach((_, i) => (defaults[i] = true));
-    setSelectedPairs(defaults);
-    setShowPopup(true);
-  };
-
-  const toggleAllPairs = (checked) => {
-    const newState = {};
-    autoPairs.forEach((_, i) => (newState[i] = checked));
-    setSelectedPairs(newState);
+    // 🟢 Thay vì mở popup, chuyển sang trang /auto-range
+    // console.log('✅ Auto pairs:', pairs); // gợi ý: thêm log để kiểm tra dữ liệu
+  navigate('auto-sort', { state: {fighters} });
   };
 
   const handleConfirmMatch = async () => {
@@ -203,21 +199,22 @@ const FighterTable = ({ fighters = [], selectable = false, onPairSelected, reset
 
 
         <div className="flex items-center gap-2">
-          <label>Độ lệch (kg):</label>
+          {/* <label>Độ lệch (kg):</label>
           <input
             type="number"
             value={tolerance}
             onChange={e => setTolerance(Number(e.target.value))}
             className="border p-1 w-20 rounded"
-          />
+          /> */}
           <button
-            onClick={handleAutoPair}
-            className={`px-3 py-1 rounded text-white ${
-              isLoggedIn ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Tự động xếp cặp
-          </button>
+          onClick={handleAutoPair}  // ✅ gọi hàm xử lý (trong đó có navigate)
+          className={`px-3 py-1 rounded text-white ${
+            isLoggedIn ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'
+          }`}
+        >
+          Tự động xếp cặp
+        </button>
+
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import MatchesPage from "../pages/Matches";
 import DashboardPage from "../pages/Dashboard";
 import FightersPage from "../pages/Fighters";
 import AdminLogin from "../components/AdminLogin";
+import AutoSort from "../pages/AutoSort";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,12 @@ const router = createBrowserRouter([
       },
       {
         path: "/fighters",
-        element: <FightersPage/>
+        element: <FightersPage/>,
+        children: [
+        {
+          path: "auto-sort", // KHÔNG có dấu "/" ở đầu -> sẽ thành /fighters/auto-sort
+          element: <AutoSort />
+        }]
       },
         {
         path: "/matches",
@@ -50,6 +56,7 @@ const router = createBrowserRouter([
         path: "/admin",
         element: <AdminLogin/>
       },
+
     ]
   },
 ]);
