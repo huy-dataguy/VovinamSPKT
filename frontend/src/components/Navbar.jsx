@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import avatarImage from "../assets/avatar.png";
-import fightday from "../assets/vvnspkt.png";
+import fightday from "../assets/vvnspkt.webp";
 import { HiUserCircle} from "react-icons/hi2";
 import { FaOutdent } from "react-icons/fa6";
 import { TiThMenuOutline } from "react-icons/ti";
