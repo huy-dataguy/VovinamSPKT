@@ -68,9 +68,8 @@ const MatchTable = () => {
 
     setDeletingAll(true);
     try {
-      for (const m of matches) {
-        await deleteMatch(m._id).unwrap();
-      }
+      await Promise.all(matches.map(m => deleteMatch(m._id).unwrap()));
+
       alert('Đã xóa tất cả trận đấu!');
       refetch();
     } catch (err) {
@@ -80,6 +79,7 @@ const MatchTable = () => {
       setDeletingAll(false);
     }
   };
+
 
   const renderRows = (m, idx) => {
     const [redFighter, blueFighter] = m.fighters || [];

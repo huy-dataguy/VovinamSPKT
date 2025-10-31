@@ -129,25 +129,30 @@ const AutoSort = () => {
 
   // --- GỬI LÊN SERVER ---
   const handleConfirm = async () => {
-    if (!isLoggedIn) return alert('❌ Chỉ admin mới có thể xác nhận tạo trận.');
-    if (!pairs.length) return alert('⚠️ Chưa có cặp đấu nào.');
+    if (!isLoggedIn) return alert('Chỉ admin mới có thể xác nhận tạo trận.');
+    if (!pairs.length) return alert('Chưa có cặp đấu nào.');
 
     try {
       setLoading(true);
-      for (const pair of pairs) {
-        await addMatch({
-          tournamentId: '671f45e8339d27ab4b8fbc01',
-          fighters: [pair.f1._id, pair.f2._id],
-          round: 'Vòng loại',
-        }).unwrap();
-      }
-      alert('✅ Đã tạo tất cả cặp đấu thành công!');
+
+      await Promise.all(
+        pairs.map(pair =>
+          addMatch({
+            tournamentId: '671f45e8339d27ab4b8fbc01',
+            fighters: [pair.f1._id, pair.f2._id],
+            round: 'Vòng loại',
+          }).unwrap()
+        )
+      );
+
+      alert('Đã tạo tất cả cặp đấu thành công!');
       navigate(-1);
     } catch (err) {
-      alert(`❌ Lỗi: ${err?.data?.message || 'Không thể tạo trận'}`);
+      alert(`Lỗi: ${err?.data?.message || 'Không thể tạo trận'}`);
     } finally {
       setLoading(false);
     }
+
   };
 
   if (!fighters.length)
