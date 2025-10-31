@@ -70,7 +70,8 @@ const AutoSort = () => {
 
     const allPairs = [];
     const fightCount = {};
-    const getMaxMatches = (fighter) => (fighter.belt === 'Tự Vệ' ? 1 : 2);
+    const getMaxMatches = (fighter) =>
+      ['Tự Vệ', 'Lam đai', 'Lam đai I'].includes(fighter.belt) ? 1 : 2;
 
     const addPair = (f1, f2, gender, cls) => {
       if (!f1 || !f2 || f1._id === f2._id) return;
